@@ -1898,6 +1898,7 @@ def configure_apiserver():
 
     api_opts['authorization-mode'] = auth_mode
     api_opts['enable-admission-plugins'] = ','.join(admission_plugins)
+    api_opts['profiling'] = 'false'
 
     kube_version = get_version('kube-apiserver')
 
@@ -1933,8 +1934,9 @@ def configure_apiserver():
 
     audit_log_path = audit_root + '/audit.log'
     api_opts['audit-log-path'] = audit_log_path
+    api_opts['audit-log-maxage'] = '30'
+    api_opts['audit-log-maxbackup'] = '10'
     api_opts['audit-log-maxsize'] = '100'
-    api_opts['audit-log-maxbackup'] = '9'
 
     audit_policy_path = audit_root + '/audit-policy.yaml'
     audit_policy = hookenv.config('audit-policy')
@@ -1983,6 +1985,10 @@ def configure_controller_manager():
     controller_opts['tls-cert-file'] = str(server_crt_path)
     controller_opts['tls-private-key-file'] = str(server_key_path)
     controller_opts['cluster-name'] = leader_get('cluster_tag')
+    controller_opts['profiling'] = 'false'
+
+    # https://github.com/kubernetes/kubernetes/issues/78693
+    controller_opts['terminated-pod-gc-threshold'] = '500'
 
     cm_cloud_config_path = cloud_config_path('kube-controller-manager')
     if is_state('endpoint.aws.ready'):
@@ -2010,6 +2016,7 @@ def configure_scheduler():
     scheduler_opts['v'] = '2'
     scheduler_opts['logtostderr'] = 'true'
     scheduler_opts['master'] = 'http://127.0.0.1:8080'
+    scheduler_opts['profiling'] = 'false'
 
     configure_kubernetes_service(configure_prefix, 'kube-scheduler',
                                  scheduler_opts, 'scheduler-extra-args')
