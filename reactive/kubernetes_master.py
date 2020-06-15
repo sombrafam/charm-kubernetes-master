@@ -989,6 +989,7 @@ def start_master():
     cluster_cidr = kubernetes_common.cluster_cidr()
     if kubernetes_common.is_ipv6(cluster_cidr):
         bind_address = '::'
+        kubernetes_common.enable_ipv6_forwarding()
     configure_kube_proxy(configure_prefix,
                          ['127.0.0.1:8080'], cluster_cidr,
                          bind_address=bind_address)
